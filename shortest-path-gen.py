@@ -182,25 +182,26 @@ class ShortestPathGraph:
                 G.add_edge(u, v, weight=weight)
         
         try:
-            pos = nx.kamada_kawai_layout(G)
+            pos = self.hierarchical_layout(G)
         except:
-            pos = nx.circular_layout(G)
+            try:
+                pos = nx.kamada_kawai_layout(G)
+            except:
+                pos = nx.circular_layout(G)
         
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8), facecolor='#f5f5f5')
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10), facecolor='#f5f5f5')
         
         # ===== DIJKSTRA SIDE =====
         ax1.set_facecolor('#f5f5f5')
-        nx.draw_networkx_nodes(G, pos, node_color='#2e7d32', node_size=1500, ax=ax1)
-        nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#558b2f', node_size=1500, ax=ax1)
         
+        # Draw edges FIRST
         if dijkstra_path:
-            nx.draw_networkx_nodes(G, pos, nodelist=dijkstra_path, node_color='#f9a825', node_size=1500, ax=ax1)
             path_edges = [(dijkstra_path[i], dijkstra_path[i+1]) for i in range(len(dijkstra_path)-1)]
             all_edges = list(G.edges())
             non_path_edges = [e for e in all_edges if e not in path_edges]
             
             # Draw non-path edges as neutral light gray
-            nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=3, edge_color='#cccccc', ax=ax1)
+            nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=1.5, edge_color='#cccccc', ax=ax1, arrows=True, arrowsize=10, arrowstyle='->')
             
             # Draw path edges with gradient (dark to light green)
             num_edges = len(path_edges)
@@ -210,12 +211,19 @@ class ShortestPathGraph:
                 g = int(0x44 + (0xff - 0x44) * t)
                 b = int(0x00 + (0x88 - 0x00) * t)
                 color_hex = f'#{r:02x}{g:02x}{b:02x}'
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=4, edge_color=color_hex, style='dotted', ax=ax1)
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=3, edge_color=color_hex, style='dotted', ax=ax1, arrows=True, arrowsize=12, arrowstyle='->')
         else:
             for u, v in G.edges():
                 weight = G[u][v]['weight']
                 color = '#ff4444' if weight < 0 else '#00aa00'
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=2, edge_color=color, ax=ax1)
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=1.5, edge_color=color, ax=ax1, arrows=True, arrowsize=10, arrowstyle='->')
+        
+        # Draw nodes AFTER edges
+        nx.draw_networkx_nodes(G, pos, node_color='#2e7d32', node_size=800, ax=ax1, edgecolors='#ffffff', linewidths=2)
+        nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#558b2f', node_size=800, ax=ax1, edgecolors='#ffffff', linewidths=2)
+        
+        if dijkstra_path:
+            nx.draw_networkx_nodes(G, pos, nodelist=dijkstra_path, node_color='#f9a825', node_size=800, ax=ax1, edgecolors='#ffffff', linewidths=2)
         
         nx.draw_networkx_labels(G, pos, font_size=14, font_weight='bold', font_color='#ffffff', ax=ax1)
         
@@ -239,17 +247,15 @@ class ShortestPathGraph:
         
         # ===== BELLMAN-FORD SIDE =====
         ax2.set_facecolor('#f5f5f5')
-        nx.draw_networkx_nodes(G, pos, node_color='#2e7d32', node_size=1500, ax=ax2)
-        nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#558b2f', node_size=1500, ax=ax2)
         
+        # Draw edges FIRST
         if bellman_path:
-            nx.draw_networkx_nodes(G, pos, nodelist=bellman_path, node_color='#f9a825', node_size=1500, ax=ax2)
             path_edges = [(bellman_path[i], bellman_path[i+1]) for i in range(len(bellman_path)-1)]
             all_edges = list(G.edges())
             non_path_edges = [e for e in all_edges if e not in path_edges]
             
             # Draw non-path edges as neutral light gray
-            nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=3, edge_color='#cccccc', ax=ax2)
+            nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=1.5, edge_color='#cccccc', ax=ax2, arrows=True, arrowsize=10, arrowstyle='->')
             
             # Draw path edges with gradient (dark to light green)
             num_edges = len(path_edges)
@@ -259,12 +265,19 @@ class ShortestPathGraph:
                 g = int(0x44 + (0xff - 0x44) * t)
                 b = int(0x00 + (0x88 - 0x00) * t)
                 color_hex = f'#{r:02x}{g:02x}{b:02x}'
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=4, edge_color=color_hex, style='dotted', ax=ax2)
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=3, edge_color=color_hex, style='dotted', ax=ax2, arrows=True, arrowsize=12, arrowstyle='->')
         else:
             for u, v in G.edges():
                 weight = G[u][v]['weight']
                 color = '#ff4444' if weight < 0 else '#00aa00'
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=2, edge_color=color, ax=ax2)
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=1.5, edge_color=color, ax=ax2, arrows=True, arrowsize=10, arrowstyle='->')
+        
+        # Draw nodes AFTER edges
+        nx.draw_networkx_nodes(G, pos, node_color='#2e7d32', node_size=800, ax=ax2, edgecolors='#ffffff', linewidths=2)
+        nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#558b2f', node_size=800, ax=ax2, edgecolors='#ffffff', linewidths=2)
+        
+        if bellman_path:
+            nx.draw_networkx_nodes(G, pos, nodelist=bellman_path, node_color='#f9a825', node_size=800, ax=ax2, edgecolors='#ffffff', linewidths=2)
         
         nx.draw_networkx_labels(G, pos, font_size=14, font_weight='bold', font_color='#ffffff', ax=ax2)
         
@@ -325,6 +338,85 @@ class ShortestPathGraph:
                    bbox=dict(boxstyle='circle,pad=0.3', facecolor='#cccccc', alpha=0.95, edgecolor='#2e7d32', linewidth=1.5),
                    color='#000000')
     
+    def hierarchical_layout(self, G, root='A'):
+        """Create layered layout with barycenter ordering to minimize crossings"""
+        pos = {}
+        
+        # BFS to calculate depth of each node
+        from collections import deque
+        
+        depth = {node: 0 for node in G.nodes()}
+        queue = deque([root])
+        visited = {root}
+        
+        while queue:
+            node = queue.popleft()
+            for successor in G.successors(node):
+                if successor not in visited:
+                    depth[successor] = depth[node] + 1
+                    visited.add(successor)
+                    queue.append(successor)
+        
+        # Group nodes by depth
+        depth_groups = defaultdict(list)
+        for node in G.nodes():
+            depth_groups[depth[node]].append(node)
+        
+        # Calculate x positions based on depth
+        max_depth = max(depth.values()) if depth else 0
+        if max_depth > 0:
+            x_step = 20 / (max_depth + 1)
+        else:
+            x_step = 1
+        
+        # First pass: position nodes by depth (unsorted)
+        temp_pos = {}
+        for d in sorted(depth_groups.keys()):
+            nodes_at_depth = depth_groups[d]
+            x = -10 + (d + 1) * x_step
+            
+            num_nodes = len(nodes_at_depth)
+            if num_nodes == 1:
+                temp_pos[nodes_at_depth[0]] = (x, 0)
+            else:
+                y_range = 8
+                y_step = y_range / (num_nodes - 1) if num_nodes > 1 else 1
+                for i, node in enumerate(nodes_at_depth):
+                    y = -4 + i * y_step
+                    temp_pos[node] = (x, y)
+        
+        # Second pass: reorder nodes at each depth by barycenter of their children
+        # to minimize edge crossings
+        for d in sorted(depth_groups.keys()):
+            nodes_at_depth = depth_groups[d]
+            
+            # Calculate barycenter (average y position of children)
+            barycenters = {}
+            for node in nodes_at_depth:
+                children = [v for u, v in G.edges() if u == node]
+                if children:
+                    child_y_values = [temp_pos.get(child, (0, 0))[1] for child in children]
+                    barycenters[node] = sum(child_y_values) / len(child_y_values)
+                else:
+                    barycenters[node] = temp_pos[node][1]
+            
+            # Sort nodes by barycenter
+            sorted_nodes = sorted(nodes_at_depth, key=lambda n: barycenters[n])
+            
+            # Reposition sorted nodes
+            x = -10 + (d + 1) * x_step
+            num_nodes = len(sorted_nodes)
+            if num_nodes == 1:
+                pos[sorted_nodes[0]] = (x, 0)
+            else:
+                y_range = 8
+                y_step = y_range / (num_nodes - 1) if num_nodes > 1 else 1
+                for i, node in enumerate(sorted_nodes):
+                    y = -4 + i * y_step
+                    pos[node] = (x, y)
+        
+        return pos
+
     def visualize(self, start, distances=None, path=None, algorithm="Dijkstra", visit_order=None, generic_title=False):
         """Visualize the graph with matplotlib"""
         G = nx.DiGraph()  # Use directed graph
@@ -334,47 +426,44 @@ class ShortestPathGraph:
             for v, weight in self.graph[u]:
                 G.add_edge(u, v, weight=weight)
         
-        # Create layout - use simple kamada_kawai without weight to avoid issues
+        # Create layout - use hierarchical for tree-like structures
         try:
-            pos = nx.kamada_kawai_layout(G)
+            pos = self.hierarchical_layout(G)
         except:
-            # Fallback to circular layout if kamada_kawai fails
-            pos = nx.circular_layout(G)
+            try:
+                pos = nx.kamada_kawai_layout(G)
+            except:
+                # Fallback to circular layout if kamada_kawai fails
+                pos = nx.circular_layout(G)
         
         # Draw graph with light mode
-        fig, ax = plt.subplots(figsize=(10, 8), facecolor='#f5f5f5')
+        fig, ax = plt.subplots(figsize=(14, 10), facecolor='#f5f5f5')
         ax.set_facecolor('#f5f5f5')
-        nx.draw_networkx_nodes(G, pos, node_color='#2e7d32', node_size=1500, ax=ax)
         
-        # Highlight start node
-        if start:
-            nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#558b2f', node_size=1500, ax=ax)
-        
-        # Draw edges with color coding based on weight
+        # Draw edges FIRST (so they go behind nodes)
         edge_colors = []
         edge_widths = []
         for u, v in G.edges():
             weight = G[u][v]['weight']
             if weight < 0:
                 edge_colors.append('#ff4444')  # Red for negative
-                edge_widths.append(4)
+                edge_widths.append(2)
             else:
                 edge_colors.append('#00aa00')  # Green for positive
-                edge_widths.append(3)
+                edge_widths.append(1.5)
         
         # Highlight path if provided
         if path:
-            nx.draw_networkx_nodes(G, pos, nodelist=path, node_color='#f9a825', node_size=1500, ax=ax)
             path_edges = [(path[i], path[i+1]) for i in range(len(path)-1)]
             
             # Draw all non-path edges as neutral light gray
             all_edges = list(G.edges())
             non_path_edges = [e for e in all_edges if e not in path_edges and (e[1], e[0]) not in path_edges]
             non_path_colors = ['#cccccc'] * len(non_path_edges)
-            non_path_widths = [3] * len(non_path_edges)
+            non_path_widths = [1.5] * len(non_path_edges)
             
             nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=non_path_widths, 
-                                 edge_color=non_path_colors, ax=ax)
+                                 edge_color=non_path_colors, ax=ax, arrows=True, arrowsize=10, arrowstyle='->')
             
             # Draw path edges with dark-to-light green gradient and dotted style
             num_edges = len(path_edges)
@@ -390,12 +479,22 @@ class ShortestPathGraph:
                 color_hex = f'#{r:02x}{g:02x}{b:02x}'
                 
                 # Draw with dotted style and gradient color
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=4, edge_color=color_hex, 
-                                     style='dotted', ax=ax)
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=3, edge_color=color_hex, 
+                                     style='dotted', ax=ax, arrows=True, arrowsize=12, arrowstyle='->')
         else:
-            # Draw all edges with color coding
             nx.draw_networkx_edges(G, pos, edgelist=list(G.edges()), width=edge_widths, 
-                                 edge_color=edge_colors, ax=ax)
+                                 edge_color=edge_colors, ax=ax, arrows=True, arrowsize=10, arrowstyle='->')
+        
+        # Draw nodes AFTER edges (so they appear on top)
+        nx.draw_networkx_nodes(G, pos, node_color='#2e7d32', node_size=800, ax=ax, edgecolors='#ffffff', linewidths=2)
+        
+        # Highlight start node
+        if start:
+            nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#558b2f', node_size=800, ax=ax, edgecolors='#ffffff', linewidths=2)
+        
+        # Highlight path if provided
+        if path:
+            nx.draw_networkx_nodes(G, pos, nodelist=path, node_color='#f9a825', node_size=800, ax=ax, edgecolors='#ffffff', linewidths=2)
         
         # Draw labels
         nx.draw_networkx_labels(G, pos, font_size=16, font_weight='bold', font_color='#ffffff', ax=ax)
@@ -476,6 +575,50 @@ def get_preset_graphs():
             ]
         },
         '5': {
+            'name': 'Complex Graph',
+            'edges': [
+                ('A','Ba',1),('A','Bb',1),
+
+                ('Ba','Ca',1),('Ba','Ia',1),
+                ('Ca','Da',1),('Ca','Fa',1),
+                ('Da','Fa',1),('Da','Ea',1),
+                ('Fa','Ga',1),('Ea','Ga',1),
+                ('Ea','Ha',1),('Ga','Ha',1),
+                ('Ia','Ja',1),('Ia','La',1),
+                ('Ja','La',1),('Ja','Ka',1),
+                ('La','Ma',1),('Ka','Ma',1),
+                ('Ka','Na',1),('Ma','Na',1),
+                ('Ha','Oa',1),('Na','Oa',1),
+
+                ('Bb','Cb',1),('Bb','Ib',1),
+                ('Cb','Db',1),('Cb','Fb',1),
+                ('Db','Fb',1),('Db','Eb',1),
+                ('Fb','Gb',1),('Eb','Gb',1),
+                ('Eb','Hb',1),('Gb','Hb',1),
+                ('Ib','Jb',1),('Ib','Lb',1),
+                ('Jb','Lb',1),('Jb','Kb',1),
+                ('Lb','Mb',1),('Kb','Mb',1),
+                ('Kb','Nb',1),('Mb','Nb',1),
+                ('Hb','Ob',1),('Nb','Ob',1),
+
+                ('Oa','P',1),('Ob','P',1)
+
+            ]
+        },
+        '6': {
+            'name': 'Simple Complex',
+            'edges': [
+                ('A', 'B', 1),
+                ('A', 'C', 1),
+                ('B', 'D', 1),
+                ('C', 'D', 1),
+                ('D', 'E', 1),
+                ('D', 'F', 1),
+                ('E', 'G', 1),
+                ('F', 'G', 1)
+            ]
+        },
+        '7': {
             'name': 'Custom - Enter your own edges',
             'edges': None  # Will prompt user
         }
@@ -498,20 +641,18 @@ def select_graph():
     for key, preset in presets.items():
         print(f"  {key}. {preset['name']}")
 
+    # Generate valid choices dynamically
+    valid_choices = list(presets.keys())
+    choice_range = f"1-{len(presets)}"
+
     while True:
-        choice = input("\nEnter your choice (1-5): ").strip()
+        choice = input(f"\nEnter your choice ({choice_range}): ").strip()
         if choice in presets:
-            if choice == '5':
-                # Custom graph - would require more complex input
-                print("\nCustom graph entry not fully implemented.")
-                print("Using Medium preset instead.")
-                return presets['2']['edges']
-            else:
-                preset = presets[choice]
-                print(f"\nSelected: {preset['name']}")
-                return preset['edges']
+            preset = presets[choice]
+            print(f"\nSelected: {preset['name']}")
+            return preset['edges']
         else:
-            print("Invalid choice. Please enter 1, 2, 3, 4, or 5.")
+            print(f"Invalid choice. Please enter one of: {', '.join(valid_choices)}")
 
 
 def save_output_to_file(filename, content):
