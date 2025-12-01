@@ -385,36 +385,50 @@ class ShortestPathGraph:
                     y = -4 + i * y_step
                     temp_pos[node] = (x, y)
         
-        # Second pass: reorder nodes at each depth by barycenter of their children
-        # to minimize edge crossings
-        for d in sorted(depth_groups.keys()):
-            nodes_at_depth = depth_groups[d]
-            
-            # Calculate barycenter (average y position of children)
-            barycenters = {}
-            for node in nodes_at_depth:
-                children = [v for u, v in G.edges() if u == node]
-                if children:
-                    child_y_values = [temp_pos.get(child, (0, 0))[1] for child in children]
-                    barycenters[node] = sum(child_y_values) / len(child_y_values)
+        # Multiple passes: reorder nodes at each depth by barycenter
+        # Use both children (successors) and parents (predecessors)
+        for _ in range(3):  # Multiple passes to stabilize ordering
+            for d in sorted(depth_groups.keys()):
+                nodes_at_depth = depth_groups[d]
+                
+                # Calculate barycenter (average y position of both children AND parents)
+                barycenters = {}
+                for node in nodes_at_depth:
+                    y_values = []
+                    
+                    # Add children positions
+                    children = [v for u, v in G.edges() if u == node]
+                    for child in children:
+                        if child in temp_pos:
+                            y_values.append(temp_pos[child][1])
+                    
+                    # Add parent positions
+                    parents = [u for u, v in G.edges() if v == node]
+                    for parent in parents:
+                        if parent in temp_pos:
+                            y_values.append(temp_pos[parent][1])
+                    
+                    if y_values:
+                        barycenters[node] = sum(y_values) / len(y_values)
+                    else:
+                        barycenters[node] = temp_pos[node][1]
+                
+                # Sort nodes by barycenter
+                sorted_nodes = sorted(nodes_at_depth, key=lambda n: barycenters[n])
+                
+                # Reposition sorted nodes
+                x = -10 + (d + 1) * x_step
+                num_nodes = len(sorted_nodes)
+                if num_nodes == 1:
+                    temp_pos[sorted_nodes[0]] = (x, 0)
                 else:
-                    barycenters[node] = temp_pos[node][1]
-            
-            # Sort nodes by barycenter
-            sorted_nodes = sorted(nodes_at_depth, key=lambda n: barycenters[n])
-            
-            # Reposition sorted nodes
-            x = -10 + (d + 1) * x_step
-            num_nodes = len(sorted_nodes)
-            if num_nodes == 1:
-                pos[sorted_nodes[0]] = (x, 0)
-            else:
-                y_range = 8
-                y_step = y_range / (num_nodes - 1) if num_nodes > 1 else 1
-                for i, node in enumerate(sorted_nodes):
-                    y = -4 + i * y_step
-                    pos[node] = (x, y)
+                    y_range = 8
+                    y_step = y_range / (num_nodes - 1) if num_nodes > 1 else 1
+                    for i, node in enumerate(sorted_nodes):
+                        y = -4 + i * y_step
+                        temp_pos[node] = (x, y)
         
+        pos = temp_pos
         return pos
 
     def visualize(self, start, distances=None, path=None, algorithm="Dijkstra", visit_order=None, generic_title=False):
