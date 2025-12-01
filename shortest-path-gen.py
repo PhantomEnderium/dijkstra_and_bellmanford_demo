@@ -200,46 +200,45 @@ class ShortestPathGraph:
             all_edges = list(G.edges())
             non_path_edges = [e for e in all_edges if e not in path_edges]
             
-            # Draw non-path edges as neutral light gray
-            nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=1.5, edge_color='#cccccc', ax=ax1, arrows=True, arrowsize=10, arrowstyle='->')
+            # Draw non-path edges as solid black
+            nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=1.5, edge_color='#000000', ax=ax1, arrows=True, arrowsize=10, arrowstyle='->')
             
-            # Draw path edges with gradient (dark to light green)
+            # Draw path edges with widely spaced dashes
             num_edges = len(path_edges)
             for i, (u, v) in enumerate(path_edges):
-                t = i / max(num_edges - 1, 1)
-                r = int(0)
-                g = int(0x44 + (0xff - 0x44) * t)
-                b = int(0x00 + (0x88 - 0x00) * t)
-                color_hex = f'#{r:02x}{g:02x}{b:02x}'
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=3, edge_color=color_hex, style='dotted', ax=ax1, arrows=True, arrowsize=12, arrowstyle='->')
+                # Draw with spaced dashes (5 on, 5 off) and solid black color
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=3, edge_color='#000000', style=(0, (5, 5)), ax=ax1, arrows=True, arrowsize=12, arrowstyle='->')
         else:
             for u, v in G.edges():
                 weight = G[u][v]['weight']
-                color = '#ff4444' if weight < 0 else '#00aa00'
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=1.5, edge_color=color, ax=ax1, arrows=True, arrowsize=10, arrowstyle='->')
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=1.5, edge_color='#000000', ax=ax1, arrows=True, arrowsize=10, arrowstyle='->')
         
         # Draw nodes AFTER edges
-        nx.draw_networkx_nodes(G, pos, node_color='#2e7d32', node_size=800, ax=ax1, edgecolors='#ffffff', linewidths=2)
-        nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#558b2f', node_size=800, ax=ax1, edgecolors='#ffffff', linewidths=2)
+        nx.draw_networkx_nodes(G, pos, node_color='#ffffff', node_size=800, ax=ax1, edgecolors='#000000', linewidths=2)
+        nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#ffffff', node_size=800, ax=ax1, edgecolors='#000000', linewidths=2)
         
         if dijkstra_path:
-            nx.draw_networkx_nodes(G, pos, nodelist=dijkstra_path, node_color='#f9a825', node_size=800, ax=ax1, edgecolors='#ffffff', linewidths=2)
+            nx.draw_networkx_nodes(G, pos, nodelist=dijkstra_path, node_color='#000000', node_size=800, ax=ax1, edgecolors='#000000', linewidths=2)
         
-        nx.draw_networkx_labels(G, pos, font_size=14, font_weight='bold', font_color='#ffffff', ax=ax1)
+        # Create label colors - black text for normal nodes, white text for path nodes
+        label_colors = {}
+        for node in G.nodes():
+            if dijkstra_path and node in dijkstra_path:
+                label_colors[node] = '#ffffff'
+            else:
+                label_colors[node] = '#000000'
         
-        if dijkstra_visit:
-            for node, order in dijkstra_visit.items():
-                x, y = pos[node]
-                ax1.text(x - 0.08, y + 0.08, str(order), fontsize=9, weight='bold',
-                       bbox=dict(boxstyle='circle,pad=0.2', facecolor='#ffaa00', edgecolor='#000000', linewidth=1),
-                       color='#000000', ha='center', va='center')
+        # Draw labels with different colors based on node type
+        for node in G.nodes():
+            nx.draw_networkx_labels(G, pos, {node: node}, font_size=14, font_weight='bold', 
+                                   font_color=label_colors[node], ax=ax1)
         
         edge_labels = nx.get_edge_attributes(G, 'weight')
         for (u, v), label in edge_labels.items():
             x = (pos[u][0] + pos[v][0]) / 2
             y = (pos[u][1] + pos[v][1]) / 2
             ax1.text(x, y, str(label), fontsize=10, ha='center', va='center',
-                   bbox=dict(boxstyle='circle,pad=0.3', facecolor='#cccccc', alpha=0.95, edgecolor='#2e7d32', linewidth=1.5),
+                   bbox=dict(boxstyle='circle,pad=0.3', facecolor='#ffffff', alpha=0.95, edgecolor='#000000', linewidth=1.5),
                    color='#000000')
         
         ax1.set_title(f"Dijkstra's Algorithm", fontsize=14, fontweight='bold', color='#000000')
@@ -254,38 +253,44 @@ class ShortestPathGraph:
             all_edges = list(G.edges())
             non_path_edges = [e for e in all_edges if e not in path_edges]
             
-            # Draw non-path edges as neutral light gray
-            nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=1.5, edge_color='#cccccc', ax=ax2, arrows=True, arrowsize=10, arrowstyle='->')
+            # Draw non-path edges as solid black
+            nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=1.5, edge_color='#000000', ax=ax2, arrows=True, arrowsize=10, arrowstyle='->')
             
-            # Draw path edges with gradient (dark to light green)
+            # Draw path edges with widely spaced dashes
             num_edges = len(path_edges)
             for i, (u, v) in enumerate(path_edges):
-                t = i / max(num_edges - 1, 1)
-                r = int(0)
-                g = int(0x44 + (0xff - 0x44) * t)
-                b = int(0x00 + (0x88 - 0x00) * t)
-                color_hex = f'#{r:02x}{g:02x}{b:02x}'
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=3, edge_color=color_hex, style='dotted', ax=ax2, arrows=True, arrowsize=12, arrowstyle='->')
+                # Draw with spaced dashes (5 on, 5 off) and solid black color
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=3, edge_color='#000000', style=(0, (5, 5)), ax=ax2, arrows=True, arrowsize=12, arrowstyle='->')
         else:
             for u, v in G.edges():
                 weight = G[u][v]['weight']
-                color = '#ff4444' if weight < 0 else '#00aa00'
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=1.5, edge_color=color, ax=ax2, arrows=True, arrowsize=10, arrowstyle='->')
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=1.5, edge_color='#000000', ax=ax2, arrows=True, arrowsize=10, arrowstyle='->')
         
         # Draw nodes AFTER edges
-        nx.draw_networkx_nodes(G, pos, node_color='#2e7d32', node_size=800, ax=ax2, edgecolors='#ffffff', linewidths=2)
-        nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#558b2f', node_size=800, ax=ax2, edgecolors='#ffffff', linewidths=2)
+        nx.draw_networkx_nodes(G, pos, node_color='#ffffff', node_size=800, ax=ax2, edgecolors='#000000', linewidths=2)
+        nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#ffffff', node_size=800, ax=ax2, edgecolors='#000000', linewidths=2)
         
         if bellman_path:
-            nx.draw_networkx_nodes(G, pos, nodelist=bellman_path, node_color='#f9a825', node_size=800, ax=ax2, edgecolors='#ffffff', linewidths=2)
+            nx.draw_networkx_nodes(G, pos, nodelist=bellman_path, node_color='#000000', node_size=800, ax=ax2, edgecolors='#000000', linewidths=2)
         
-        nx.draw_networkx_labels(G, pos, font_size=14, font_weight='bold', font_color='#ffffff', ax=ax2)
+        # Create label colors - black text for normal nodes, white text for path nodes
+        label_colors = {}
+        for node in G.nodes():
+            if bellman_path and node in bellman_path:
+                label_colors[node] = '#ffffff'
+            else:
+                label_colors[node] = '#000000'
+        
+        # Draw labels with different colors based on node type
+        for node in G.nodes():
+            nx.draw_networkx_labels(G, pos, {node: node}, font_size=14, font_weight='bold', 
+                                   font_color=label_colors[node], ax=ax2)
         
         for (u, v), label in edge_labels.items():
             x = (pos[u][0] + pos[v][0]) / 2
             y = (pos[u][1] + pos[v][1]) / 2
             ax2.text(x, y, str(label), fontsize=10, ha='center', va='center',
-                   bbox=dict(boxstyle='circle,pad=0.3', facecolor='#cccccc', alpha=0.95, edgecolor='#2e7d32', linewidth=1.5),
+                   bbox=dict(boxstyle='circle,pad=0.3', facecolor='#ffffff', alpha=0.95, edgecolor='#000000', linewidth=1.5),
                    color='#000000')
         
         ax2.set_title(f"Bellman-Ford Algorithm", fontsize=14, fontweight='bold', color='#000000')
@@ -324,7 +329,7 @@ class ShortestPathGraph:
                 [pos[u][1], pos[v][1]],
                 color=color,
                 linewidth=4,
-                linestyle='dotted',
+                linestyle='dashed',
                 zorder=2
             )
     
@@ -335,7 +340,7 @@ class ShortestPathGraph:
             y = (pos[u][1] + pos[v][1]) / 2
             
             ax.text(x, y, str(label), fontsize=font_size, ha='center', va='center',
-                   bbox=dict(boxstyle='circle,pad=0.3', facecolor='#cccccc', alpha=0.95, edgecolor='#2e7d32', linewidth=1.5),
+                   bbox=dict(boxstyle='circle,pad=0.3', facecolor='#ffffff', alpha=0.95, edgecolor='#000000', linewidth=1.5),
                    color='#000000')
     
     def hierarchical_layout(self, G, root='A'):
@@ -459,12 +464,8 @@ class ShortestPathGraph:
         edge_widths = []
         for u, v in G.edges():
             weight = G[u][v]['weight']
-            if weight < 0:
-                edge_colors.append('#ff4444')  # Red for negative
-                edge_widths.append(2)
-            else:
-                edge_colors.append('#00aa00')  # Green for positive
-                edge_widths.append(1.5)
+            edge_colors.append('#000000')  # Solid black for all edges
+            edge_widths.append(1.5)
         
         # Highlight path if provided
         if path:
@@ -473,53 +474,45 @@ class ShortestPathGraph:
             # Draw all non-path edges as neutral light gray
             all_edges = list(G.edges())
             non_path_edges = [e for e in all_edges if e not in path_edges and (e[1], e[0]) not in path_edges]
-            non_path_colors = ['#cccccc'] * len(non_path_edges)
+            non_path_colors = ['#000000'] * len(non_path_edges)
             non_path_widths = [1.5] * len(non_path_edges)
             
             nx.draw_networkx_edges(G, pos, edgelist=non_path_edges, width=non_path_widths, 
                                  edge_color=non_path_colors, ax=ax, arrows=True, arrowsize=10, arrowstyle='->')
             
-            # Draw path edges with dark-to-light green gradient and dotted style
+            # Draw path edges with solid black dotted style
             num_edges = len(path_edges)
             for i, (u, v) in enumerate(path_edges):
-                # Gradient position (0 to 1)
-                t = i / max(num_edges - 1, 1)
-                
-                # Gradient: dark green (#004400) to light green (#00ff88)
-                r = int(0)
-                g = int(0x44 + (0xff - 0x44) * t)
-                b = int(0x00 + (0x88 - 0x00) * t)
-                
-                color_hex = f'#{r:02x}{g:02x}{b:02x}'
-                
-                # Draw with dotted style and gradient color
-                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=3, edge_color=color_hex, 
-                                     style='dotted', ax=ax, arrows=True, arrowsize=12, arrowstyle='->')
+                # Draw with spaced dashes (5 on, 5 off) and solid black color
+                nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], width=3, edge_color='#000000', 
+                                     style=(0, (5, 5)), ax=ax, arrows=True, arrowsize=12, arrowstyle='->')
         else:
             nx.draw_networkx_edges(G, pos, edgelist=list(G.edges()), width=edge_widths, 
                                  edge_color=edge_colors, ax=ax, arrows=True, arrowsize=10, arrowstyle='->')
         
         # Draw nodes AFTER edges (so they appear on top)
-        nx.draw_networkx_nodes(G, pos, node_color='#2e7d32', node_size=800, ax=ax, edgecolors='#ffffff', linewidths=2)
+        nx.draw_networkx_nodes(G, pos, node_color='#ffffff', node_size=800, ax=ax, edgecolors='#000000', linewidths=2)
         
         # Highlight start node
         if start:
-            nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#558b2f', node_size=800, ax=ax, edgecolors='#ffffff', linewidths=2)
+            nx.draw_networkx_nodes(G, pos, nodelist=[start], node_color='#ffffff', node_size=800, ax=ax, edgecolors='#000000', linewidths=2)
         
         # Highlight path if provided
         if path:
-            nx.draw_networkx_nodes(G, pos, nodelist=path, node_color='#f9a825', node_size=800, ax=ax, edgecolors='#ffffff', linewidths=2)
+            nx.draw_networkx_nodes(G, pos, nodelist=path, node_color='#000000', node_size=800, ax=ax, edgecolors='#000000', linewidths=2)
         
-        # Draw labels
-        nx.draw_networkx_labels(G, pos, font_size=16, font_weight='bold', font_color='#ffffff', ax=ax)
+        # Create label colors - black text for normal nodes, white text for path nodes
+        label_colors = {}
+        for node in G.nodes():
+            if path and node in path:
+                label_colors[node] = '#ffffff'
+            else:
+                label_colors[node] = '#000000'
         
-        # Draw visit order numbers if provided
-        if visit_order:
-            for node, order in visit_order.items():
-                x, y = pos[node]
-                ax.text(x - 0.08, y + 0.08, str(order), fontsize=10, weight='bold',
-                       bbox=dict(boxstyle='circle,pad=0.2', facecolor='#ffaa00', edgecolor='#000000', linewidth=1),
-                       color='#000000', ha='center', va='center')
+        # Draw labels with different colors based on node type
+        for node in G.nodes():
+            nx.draw_networkx_labels(G, pos, {node: node}, font_size=16, font_weight='bold', 
+                                   font_color=label_colors[node], ax=ax)
         
         # Draw edge weights with offset to avoid overlap
         edge_labels = nx.get_edge_attributes(G, 'weight')
@@ -591,7 +584,7 @@ def get_preset_graphs():
         '5': {
             'name': 'Complex Graph',
             'edges': [
-                ('A','Ba',-20),('A','Bb',4),
+                ('A','Ba',4),('A','Bb',4),
 
                 ('Ba','Ca',7),('Ba','Ia',1),
                 ('Ca','Da',2),('Ca','Fa',1),
