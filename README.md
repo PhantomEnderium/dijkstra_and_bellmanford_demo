@@ -2,6 +2,8 @@
 
 A comprehensive Python implementation and comparison of **Dijkstra's Algorithm** and **Bellman-Ford Algorithm** for finding shortest paths in weighted graphs, with interactive visualization.
 
+*Please note this entire project was created using Claude Haiku 4.5 and other generative AI software. This was created as part of a school project, and as such needed something done quick. I take no credit beyond the prompts given, and this message right here.*
+
 ## Setup
 
 ### 1. Install Dependencies
