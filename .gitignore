@@ -1,6 +1,7 @@
 # Generated files
 *.png
 *.txt
+!requirements.txt
 __pycache__/
 *.py[cod]
 *$py.class
