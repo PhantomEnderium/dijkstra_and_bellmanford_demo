@@ -26,10 +26,11 @@ else:
 class ShortestPathGraph:
     """Graph implementation for shortest path algorithms"""
     
-    def __init__(self):
+    def __init__(self, transparent_bg=False):
         self.graph = defaultdict(list)
         self.nodes = set()
         self.edges_list = []  # Store edges for Bellman-Ford
+        self.transparent_bg = transparent_bg  # True for transparent, False for white
     
     def add_edge(self, u, v, weight, directed=True):
         """Add a directed edge to the graph"""
@@ -285,10 +286,11 @@ class ShortestPathGraph:
             except:
                 pos = nx.circular_layout(G)
         
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10), facecolor='#f5f5f5')
+        bg_color = 'none' if self.transparent_bg else '#f5f5f5'
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(20, 10), facecolor=bg_color)
         
         # ===== DIJKSTRA SIDE =====
-        ax1.set_facecolor('#f5f5f5')
+        ax1.set_facecolor(bg_color)
         
         # Draw edges FIRST
         if dijkstra_path:
@@ -341,7 +343,7 @@ class ShortestPathGraph:
         ax1.axis('off')
         
         # ===== BELLMAN-FORD SIDE =====
-        ax2.set_facecolor('#f5f5f5')
+        ax2.set_facecolor(bg_color)
         
         # Draw edges FIRST
         if bellman_path:
@@ -552,8 +554,9 @@ class ShortestPathGraph:
                 pos = nx.circular_layout(G)
         
         # Draw graph with light mode
-        fig, ax = plt.subplots(figsize=(14, 10), facecolor='#f5f5f5')
-        ax.set_facecolor('#f5f5f5')
+        bg_color = 'none' if self.transparent_bg else '#f5f5f5'
+        fig, ax = plt.subplots(figsize=(14, 10), facecolor=bg_color)
+        ax.set_facecolor(bg_color)
         
         # Draw edges FIRST (so they go behind nodes)
         edge_colors = []
@@ -859,8 +862,20 @@ def main():
     print("Dijkstra's Algorithm vs Bellman-Ford")
     print("=" * 60)
     
+    # Ask user about background color preference
+    while True:
+        bg_choice = input("\nBackground color for images (white/transparent)? [default: white]: ").strip().lower()
+        if bg_choice == '' or bg_choice in ['w', 'white']:
+            transparent_bg = False
+            break
+        elif bg_choice in ['t', 'transparent']:
+            transparent_bg = True
+            break
+        else:
+            print("✗ Invalid choice. Enter 'white', 'transparent', or press Enter for white.")
+    
     # Create a sample graph
-    g = ShortestPathGraph()
+    g = ShortestPathGraph(transparent_bg=transparent_bg)
     
     # Get graph from preset or user input
     edges = select_graph()
@@ -1019,14 +1034,14 @@ def main():
     # Visualize graph
     print(f"\nGenerating graph visualization...")
     plt_obj = g.visualize(start_node, algorithm="Dijkstra", visit_order=dijkstra_visit, generic_title=True)
-    plt_obj.savefig('shortest_path_graph.png', dpi=150, bbox_inches='tight')
+    plt_obj.savefig('shortest_path_graph.png', dpi=150, bbox_inches='tight', transparent=g.transparent_bg)
     print("✓ Saved to 'shortest_path_graph.png'")
     image_paths.append('shortest_path_graph.png')
     
     # Visualize Dijkstra path
     print(f"Generating Dijkstra path visualization ({start_node} → {end_node})...")
     plt_obj = g.visualize(start_node, dijkstra_distances, dijkstra_path, algorithm="Dijkstra", visit_order=dijkstra_visit)
-    plt_obj.savefig('shortest_path_dijkstra_path.png', dpi=150, bbox_inches='tight')
+    plt_obj.savefig('shortest_path_dijkstra_path.png', dpi=150, bbox_inches='tight', transparent=g.transparent_bg)
     print("✓ Saved to 'shortest_path_dijkstra_path.png'")
     image_paths.append('shortest_path_dijkstra_path.png')
     
@@ -1072,7 +1087,7 @@ def main():
     # Generate side-by-side comparison image
     print(f"\nGenerating side-by-side comparison image...")
     plt_obj = g.generate_comparison_image(start_node, dijkstra_distances, dijkstra_path, bellman_distances, bellman_path, dijkstra_visit)
-    plt_obj.savefig('shortest_path_comparison.png', dpi=150, bbox_inches='tight')
+    plt_obj.savefig('shortest_path_comparison.png', dpi=150, bbox_inches='tight', transparent=g.transparent_bg)
     print("✓ Saved to 'shortest_path_comparison.png'")
     image_paths.append('shortest_path_comparison.png')
     
@@ -1096,7 +1111,7 @@ def main():
     # Visualize Bellman-Ford path
     print(f"Generating Bellman-Ford path visualization ({start_node} → {end_node})...")
     plt_obj = g.visualize(start_node, bellman_distances, bellman_path, algorithm="Bellman-Ford")
-    plt_obj.savefig('shortest_path_bellman_ford_path.png', dpi=150, bbox_inches='tight')
+    plt_obj.savefig('shortest_path_bellman_ford_path.png', dpi=150, bbox_inches='tight', transparent=g.transparent_bg)
     print("✓ Saved to 'shortest_path_bellman_ford_path.png'")
     image_paths.append('shortest_path_bellman_ford_path.png')
     
